@@ -60,6 +60,7 @@ export declare class Server {
     private scope;
     private redirect_uri;
     constructor(config: ServerConfig);
+    logined(request: Request): Promise<any>;
     start(port?: number, hostname?: string, backlog?: number): Promise<void>;
     on(event: 'public', listener: (request: Request, response: Response, user: GoogleTokenInfoJSON) => void): void;
     on(event: 'private', listener: (request: Request, response: Response) => void): void;

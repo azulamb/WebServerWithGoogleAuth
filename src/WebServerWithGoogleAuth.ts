@@ -209,7 +209,7 @@ export class Server
 				case this.path_logout: return this.logout( request, response );
 				case this.path_callback: return this.callback( request, response );
 			}
-			return this.session.get( request ).then( ( user ) =>
+			return this.logined( request ).then( ( user ) =>
 			{
 				this.events.exec( 'private', request, response, user );
 			} ).catch( ( error ) =>
@@ -218,6 +218,8 @@ export class Server
 			} );
 		} );
 	}
+
+	public logined( request: Request ) { return this.session.get( request ); }
 
 	public start( port?: number, hostname?: string, backlog?: number )
 	{

@@ -115,13 +115,14 @@ class Server {
                 case this.path_logout: return this.logout(request, response);
                 case this.path_callback: return this.callback(request, response);
             }
-            return this.session.get(request).then((user) => {
+            return this.logined(request).then((user) => {
                 this.events.exec('private', request, response, user);
             }).catch((error) => {
                 this.events.exec('public', request, response);
             });
         });
     }
+    logined(request) { return this.session.get(request); }
     start(port, hostname, backlog) {
         return new Promise((resolve) => {
             this.server.listen(port, hostname, backlog, resolve);
