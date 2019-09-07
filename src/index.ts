@@ -2,7 +2,7 @@ import * as web from './WebServerWithGoogleAuth'
 import * as path from 'path'
 import * as fs from 'fs'
 
-export const Server = web;
+export const Server = web.Server;
 
 if ( require.main === module ) { ExecServer() }
 
