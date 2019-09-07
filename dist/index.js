@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const web = require("./WebServerWithGoogleAuth");
 const path = require("path");
 const fs = require("fs");
-exports.Server = web;
+exports.Server = web.Server;
 if (require.main === module) {
     ExecServer();
 }
