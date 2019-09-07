@@ -1,0 +1,24 @@
+{
+  "name": "webserverwithgoogleauth",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "start": "node ./dist/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/HirokiMiyaoka/WebServerWithGoogleAuth.git"
+  },
+  "author": "Hiroki",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/HirokiMiyaoka/WebServerWithGoogleAuth/issues"
+  },
+  "homepage": "https://github.com/HirokiMiyaoka/WebServerWithGoogleAuth#readme",
+  "devDependencies": {
+    "@types/node": "^12.7.4"
+  }
+}

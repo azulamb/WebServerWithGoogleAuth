@@ -1,0 +1,17 @@
+{
+	"compilerOptions": {
+		"outDir": "../dist",
+		"module": "commonjs",
+		"target": "es2018",
+		"declaration": true,
+		"strictNullChecks": true,
+		"noImplicitAny": true,
+		"removeComments": true,
+		"preserveConstEnums": false,
+		"sourceMap": false
+	},
+	"include": [
+		"./types.d.ts",
+		"./index.ts"
+	]
+}
