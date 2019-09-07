@@ -10,6 +10,11 @@ interface ServerConfig
 {
 	googleauth: web.GoogleAuthConfig;
 	port?: number;
+	docroot?:
+	{
+		public: string;
+		private: string;
+	};
 	debug?: boolean;
 }
 
@@ -46,8 +51,12 @@ function StaticServer( docroot: string )
 
 function ExecServer()
 {
-	const configfile = process.argv[ 2 ] || './config.json';
-	const Config: ServerConfig = ( () => { try { return require( path.isAbsolute( configfile ) ? configfile : path.join( process.cwd(), configfile ) ); } catch( error ) {} return {}; } )();
+	function ToAbsolutePath( nowpath: string )
+	{
+		return path.isAbsolute( nowpath ) ? nowpath : path.join( process.cwd(), nowpath );
+	}
+
+	const Config: ServerConfig = ( () => { try { return require( ToAbsolutePath( process.argv[ 2 ] || './config.json' ) ); } catch( error ) {} return {}; } )();
 	const config: web.ServerConfig = { googleauth: Config.googleauth };
 
 	if ( Config.debug )
@@ -57,10 +66,17 @@ function ExecServer()
 			log: ( ... messages: any[] ) => { console.log( new Date(), ...messages ); },
 			error: ( ... messages: any[] ) => { console.error( new Date(), ...messages ); },
 		};
+		config.logger.log( Config );
 	}
+	if ( !Config.docroot )
+	{
+		Config.docroot = { public: './docs/', private: './docs_inner/' };
+	}
+	Config.docroot.public = ToAbsolutePath( Config.docroot.public );
+	Config.docroot.private = ToAbsolutePath( Config.docroot.private );
 
 	const server = new web.Server( config );
-	server.on( 'public', StaticServer( path.join( __dirname, '../docs' ) ) );
-	server.on( 'private', StaticServer( path.join( __dirname, '../docs_inner' ) ) );
-	server.start( Config.port );
+	server.on( 'public', StaticServer( Config.docroot.public ) );
+	server.on( 'private', StaticServer( Config.docroot.private ) );
+	server.start( Config.port ).then( () => { if ( config.logger ) { config.logger.log( 'Start.' ); } } );
 }
