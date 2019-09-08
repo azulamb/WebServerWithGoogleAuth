@@ -95,7 +95,6 @@ class Server {
     constructor(config) {
         const url = new URL(config.googleauth.baseurl);
         this.logger = config.logger || { log: () => { }, error: () => { } };
-        this.server = config.server || http.createServer();
         this.session = new DefaultSession(url.protocol === 'https:');
         this.events = new NodeEvent();
         this.users = config.googleauth.users;
@@ -107,27 +106,29 @@ class Server {
         this.path_logout = (config.googleauth.path ? config.googleauth.path.logout : '') || '/logout';
         this.path_callback = (config.googleauth.path ? config.googleauth.path.callback : '') || '/callback';
         this.redirect_uri = this.baseurl + this.path_callback;
-        this.server.on('request', (request, response) => {
-            this.logger.log(request.url);
-            const url = (request.url || '').split('?')[0];
-            switch (url) {
-                case this.path_login: return this.login(response);
-                case this.path_logout: return this.logout(request, response);
-                case this.path_callback: return this.callback(request, response);
-            }
-            return this.logined(request).then((user) => {
-                this.events.exec('private', request, response, user);
-            }).catch((error) => {
-                this.events.exec('public', request, response);
-            });
+    }
+    setServer(server) {
+        if (!server) {
+            server = http.createServer();
+        }
+        server.on('request', (request, response) => { this.onRequest(request, response); });
+        return server;
+    }
+    onRequest(request, response) {
+        this.logger.log(request.url);
+        const url = (request.url || '').split('?')[0];
+        switch (url) {
+            case this.path_login: return this.login(response);
+            case this.path_logout: return this.logout(request, response);
+            case this.path_callback: return this.callback(request, response);
+        }
+        return this.logined(request).then((user) => {
+            this.events.exec('private', request, response, user);
+        }).catch((error) => {
+            this.events.exec('public', request, response);
         });
     }
     logined(request) { return this.session.get(request); }
-    start(port, hostname, backlog) {
-        return new Promise((resolve) => {
-            this.server.listen(port, hostname, backlog, resolve);
-        });
-    }
     on(event, listener) {
         this.events.on(event, listener);
     }

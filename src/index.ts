@@ -78,5 +78,6 @@ function ExecServer()
 	const server = new web.Server( config );
 	server.on( 'public', StaticServer( Config.docroot.public ) );
 	server.on( 'private', StaticServer( Config.docroot.private ) );
-	server.start( Config.port ).then( () => { if ( config.logger ) { config.logger.log( 'Start.' ); } } );
+
+	server.setServer().listen( Config.port, () => { if ( config.logger ) { config.logger.log( 'Start.' ); } } );
 }

@@ -46,7 +46,6 @@ export interface Session<T> {
     remove(request: Request): Promise<void>;
 }
 export declare class Server {
-    private server;
     private logger;
     private session;
     private users;
@@ -60,8 +59,9 @@ export declare class Server {
     private scope;
     private redirect_uri;
     constructor(config: ServerConfig);
+    setServer(server?: http.Server | https.Server): https.Server | http.Server;
+    onRequest(request: Request, response: Response): void | Promise<void>;
     logined(request: Request): Promise<any>;
-    start(port?: number, hostname?: string, backlog?: number): Promise<void>;
     on(event: 'public', listener: (request: Request, response: Response, user: GoogleTokenInfoJSON) => void): void;
     on(event: 'private', listener: (request: Request, response: Response) => void): void;
     private isMember;

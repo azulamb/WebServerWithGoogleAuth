@@ -165,7 +165,6 @@ class NodeEvent
 
 export class Server
 {
-	private server: http.Server | https.Server;
 	private logger: Logger;
 	private session: Session<any>;
 	private users: string[];
@@ -185,7 +184,6 @@ export class Server
 	{
 		const url = new URL( config.googleauth.baseurl );
 		this.logger = config.logger || { log: () => {}, error: () => {} };
-		this.server = config.server || http.createServer();
 		this.session = new DefaultSession( url.protocol === 'https:' );
 		this.events = new NodeEvent();
 		this.users = config.googleauth.users;
@@ -198,36 +196,35 @@ export class Server
 		this.path_logout = ( config.googleauth.path ? config.googleauth.path.logout : '' ) || '/logout';
 		this.path_callback = ( config.googleauth.path ? config.googleauth.path.callback : '' ) || '/callback';
 		this.redirect_uri = this.baseurl + this.path_callback;
+	}
 
-		this.server.on( 'request', ( request: Request, response: Response ) =>
+	public setServer( server?: http.Server | https.Server )
+	{
+		if ( !server ) { server = http.createServer(); }
+		server.on( 'request', ( request: Request, response: Response ) => { this.onRequest( request, response ); } );
+		return server;
+	}
+
+	public onRequest( request: Request, response: Response )
+	{
+		this.logger.log( request.url );
+		const url = ( request.url || '' ).split( '?' )[ 0 ];
+		switch ( url )
 		{
-			this.logger.log( request.url );
-			const url = ( request.url || '' ).split( '?' )[ 0 ];
-			switch ( url )
-			{
-				case this.path_login: return this.login( response );
-				case this.path_logout: return this.logout( request, response );
-				case this.path_callback: return this.callback( request, response );
-			}
-			return this.logined( request ).then( ( user ) =>
-			{
-				this.events.exec( 'private', request, response, user );
-			} ).catch( ( error ) =>
-			{
-				this.events.exec( 'public', request, response );
-			} );
+			case this.path_login: return this.login( response );
+			case this.path_logout: return this.logout( request, response );
+			case this.path_callback: return this.callback( request, response );
+		}
+		return this.logined( request ).then( ( user ) =>
+		{
+			this.events.exec( 'private', request, response, user );
+		} ).catch( ( error ) =>
+		{
+			this.events.exec( 'public', request, response );
 		} );
 	}
 
 	public logined( request: Request ) { return this.session.get( request ); }
-
-	public start( port?: number, hostname?: string, backlog?: number )
-	{
-		return new Promise<void>( ( resolve ) =>
-		{
-			this.server.listen( port, hostname, backlog, resolve );
-		} );
-	}
 
 	public on( event: 'public', listener: ( request: Request, response: Response, user: GoogleTokenInfoJSON ) => void ): void;
 	public on( event: 'private', listener: ( request: Request, response: Response ) => void ): void;
