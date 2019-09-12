@@ -3,9 +3,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const http = require("http");
 const https = require("https");
 const url_1 = require("url");
-function HtRequest(input, options, callback) {
-    const url = new url_1.URL(typeof input === 'string' ? input : input.url);
-    return (url.protocol === 'http' ? http : https).request(url, options, callback);
+function HtRequest(options, callback) {
+    return (options.protocol === 'http:' ? http : https).request(options, callback);
 }
 function CreateResponse(response) {
     const res = {};
@@ -25,7 +24,19 @@ function CreateResponse(response) {
 function fetch(input, init) {
     return new Promise((resolve, reject) => {
         const options = {};
-        if (typeof input === 'string' && init) {
+        if (typeof input === 'string') {
+            try {
+                const url = new url_1.URL(input);
+                options.hostname = url.hostname;
+                options.port = url.protocol === 'http:' ? 80 : 443;
+                options.method = 'GET';
+                options.path = url.pathname + (url.search || '');
+            }
+            catch (error) {
+                return reject(error);
+            }
+        }
+        if (init) {
             if (init.method) {
                 options.method = init.method;
             }
@@ -33,7 +44,7 @@ function fetch(input, init) {
                 options.headers = init.headers;
             }
         }
-        const request = HtRequest(input, options, (response) => {
+        const request = HtRequest(options, (response) => {
             resolve(CreateResponse(response));
         });
         request.on('timeout', reject);
