@@ -1,6 +1,6 @@
 {
   "name": "webserverwithgoogleauth",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "WebServer with Google Auth",
   "main": "dist/index.js",
   "types": "dist/WebServerWithGoogleAuth.d.ts",

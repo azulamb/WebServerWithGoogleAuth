@@ -217,10 +217,22 @@ export class Server
 		}
 		return this.logined( request ).then( ( user ) =>
 		{
-			this.events.exec( 'private', request, response, user );
+			try
+			{
+				this.events.exec( 'private', request, response, user );
+			} catch ( error )
+			{
+				this.events.exec( 'error', request, response, user );
+			}
 		} ).catch( ( error ) =>
 		{
-			this.events.exec( 'public', request, response );
+			try
+			{
+				this.events.exec( 'public', request, response );
+			} catch ( error )
+			{
+				this.events.exec( 'error', request, response );
+			}
 		} );
 	}
 
@@ -228,7 +240,8 @@ export class Server
 
 	public on( event: 'public', listener: ( request: Request, response: Response, user: GoogleTokenInfoJSON ) => void ): void;
 	public on( event: 'private', listener: ( request: Request, response: Response ) => void ): void;
-	on( event: 'public' | 'private', listener: ( request: Request, response: Response, user: GoogleTokenInfoJSON ) => void )
+	public on( event: 'error', listener: ( request: Request, response: Response, user?: GoogleTokenInfoJSON ) => void ): void;
+	on( event: 'public' | 'private' | 'error', listener: ( request: Request, response: Response, user: GoogleTokenInfoJSON ) => void )
 	{
 		this.events.on( event, listener );
 	}

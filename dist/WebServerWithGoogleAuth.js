@@ -123,9 +123,19 @@ class Server {
             case this.path_callback: return this.callback(request, response);
         }
         return this.logined(request).then((user) => {
-            this.events.exec('private', request, response, user);
+            try {
+                this.events.exec('private', request, response, user);
+            }
+            catch (error) {
+                this.events.exec('error', request, response, user);
+            }
         }).catch((error) => {
-            this.events.exec('public', request, response);
+            try {
+                this.events.exec('public', request, response);
+            }
+            catch (error) {
+                this.events.exec('error', request, response);
+            }
         });
     }
     logined(request) { return this.session.get(request); }

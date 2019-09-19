@@ -64,6 +64,7 @@ export declare class Server {
     logined(request: Request): Promise<any>;
     on(event: 'public', listener: (request: Request, response: Response, user: GoogleTokenInfoJSON) => void): void;
     on(event: 'private', listener: (request: Request, response: Response) => void): void;
+    on(event: 'error', listener: (request: Request, response: Response, user?: GoogleTokenInfoJSON) => void): void;
     private isMember;
     private error;
     private redirect;

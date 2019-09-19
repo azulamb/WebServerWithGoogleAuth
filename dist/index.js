@@ -55,6 +55,7 @@ function ExecServer() {
     const server = new web.Server(config);
     server.on('public', StaticServer(Config.docroot.public));
     server.on('private', StaticServer(Config.docroot.private));
+    server.on('error', (request, response) => { response.writeHead(500); });
     server.setServer().listen(Config.port, () => { if (config.logger) {
         config.logger.log('Start.');
     } });
